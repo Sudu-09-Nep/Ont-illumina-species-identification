@@ -3,7 +3,7 @@
 This repository contains a **Snakemake workflow** to identify the likely species of a bacterial isolate from a **finished genome assembly** using **16S rRNA prediction** and **BLAST results**.
 
 It is designed as a **downstream step** to the hybrid assembly workflow available here:
-👉 [https://github.com/Sudu-09-Nep/ont-illumina-hybrid-assembly](https://github.com/Sudu-09-Nep/ont-illumina-hybrid-assembly)
+ [https://github.com/Sudu-09-Nep/ont-illumina-hybrid-assembly](https://github.com/Sudu-09-Nep/ont-illumina-hybrid-assembly)
 
 ---
 
