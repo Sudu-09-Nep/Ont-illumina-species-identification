@@ -1,0 +1,9 @@
+name: 16s_id_env
+channels:
+  - bioconda
+  - conda-forge
+dependencies:
+  - barrnap
+  - bedtools
+  - python>=3.8
+

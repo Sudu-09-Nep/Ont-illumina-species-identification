@@ -1,0 +1,16 @@
+cat << 'EOF' > .gitignore
+# Snakemake working files
+.snakemake/
+
+# Large data and results (keep only tiny test examples if needed)
+data/*
+results/*
+
+# Logs
+logs/*
+
+# OS / editor files
+.DS_Store
+*.swp
+EOF
+

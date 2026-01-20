@@ -1,0 +1,3 @@
+genome_fasta: "data/genome.fasta"
+blast_txt: "results/PY5JM8F9016-Alignment.txt"
+sample: "unknown_ecoli"
