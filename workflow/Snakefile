@@ -1,0 +1,94 @@
+import re
+import yaml
+
+with open("config.yaml") as fh:
+    config = yaml.safe_load(fh)
+
+GENOME = config["genome_fasta"]
+BLAST_TXT = config["blast_txt"]
+SAMPLE = config["sample"]
+
+rule all:
+    input:
+        "results/rRNA.gff",
+        "results/16S_only.gff",
+        "results/16S.fasta",
+        "results/species_call.tsv"
+
+rule run_barrnap:
+    input:
+        GENOME
+    output:
+        "results/rRNA.gff"
+    log:
+        "logs/barrnap.log"
+    conda:
+        "../envs/barrnap.yaml"
+    shell:
+        """
+        barrnap {input} > {output} 2> {log}
+        """
+
+rule extract_16S_gff:
+    input:
+        "results/rRNA.gff"
+    output:
+        "results/16S_only.gff"
+    shell:
+        r"""
+        awk '$3=="rRNA" && $9 ~ /16S/' {input} > {output}
+        """
+
+rule extract_16S_fasta:
+    input:
+        fasta = GENOME,
+        gff   = "results/16S_only.gff"
+    output:
+        "results/16S.fasta"
+    log:
+        "logs/bedtools_getfasta.log"
+    conda:
+        "../envs/barrnap.yaml"
+    shell:
+        r"""
+        bedtools getfasta -fi {input.fasta} -bed {input.gff} > {output} 2> {log}
+        """
+
+rule parse_blast_txt:
+    input:
+        BLAST_TXT
+    output:
+        "results/species_call.tsv"
+    run:
+        top_species = None
+
+        with open(input[0]) as f:
+            # Go to the "Sequences producing significant alignments" section
+            for line in f:
+                if line.startswith("Sequences producing significant alignments"):
+                    break
+            # Now parse lines in that section
+            for line in f:
+                line = line.strip()
+                if not line:
+                    continue
+                # Skip header lines that start with "Description" or "Scientific"
+                if line.startswith("Description") or line.startswith("Scientific"):
+                    continue
+                if line.startswith("Alignments:"):
+                    break
+                # First non-header line should be a real hit
+                parts = line.split()
+                if len(parts) < 2:
+                    continue
+                sci_name = " ".join(parts[0:2])
+                top_species = sci_name
+                break
+
+        if top_species is None:
+            top_species = "NA"
+
+        with open(output[0], "w") as out:
+            out.write("sample\tspecies\n")
+            out.write(f"{SAMPLE}\t{top_species}\n")
+
